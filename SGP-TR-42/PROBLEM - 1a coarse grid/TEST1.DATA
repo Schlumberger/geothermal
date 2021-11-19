@@ -1,0 +1,227 @@
+-- Stanford Test Problem #1
+-- 1-D radial flow of water 
+-- Injected at 160 degrees into a reservoir at 170C
+--
+------------------------------------------------------
+RUNSPEC
+
+RADIAL
+
+INCLUDE
+ '../inc/runspec_STEAM.inc' /
+
+AQUDIMS
+/
+
+DIMENS
+ 40 1 1 /
+
+----------------------------------------------------
+GRID
+
+INIT
+
+INRAD
+ 1E-5 /
+
+
+DR
+40*25. /
+
+DTHETA
+ 40*360 /
+
+DZ
+ 40*100 /
+
+TOPS
+ 40*0 /
+
+PORO
+ 40*0.2 /
+
+PERMX
+ 40*10000 /
+ 
+PERMY
+ 40*10000 /
+
+PERMZ
+ 40*10000 /
+
+-- Rock and fluid thermal properties
+THCOIL
+ 40*59.8 /
+THCWATER
+ 40*59.8 /
+THCGAS
+ 40*4.11 /
+
+-- NEEDED for ECLIPSE THERMAL
+HEATCR
+ 40*2500 /
+THCROCK
+-- Problem specifies 20 watt/m-C
+-- ECLIPSE has kJ/day/m-K and 1 watt/m-C = 86.4 kJ/day/m-K
+-- so 20*86.4 = 1728.
+-- NOTE: this number determines how sharp the temperature
+-- front will be. Zero gives a sharp front.
+ 40*1728 /
+
+AQUANCON
+ 1 40 40 1 1 1 1 X+ /
+/
+
+---------------------------------------------------
+PROPS
+
+INCLUDE
+ '../inc/props_STEAM.inc' /
+
+ROCK
+ 15 0 /
+
+SWOF
+0. 0. 0. 0.
+.3 0. 0. 0.
+.4 .0008 0. 0.
+.5 .0123 0. 0.
+.6 .0625 0. 0.
+.7 .1979 0. 0.
+.8 .4822 0. 0.
+.9 1. 0. 0.
+1. 1. 0. 0.
+/
+
+SGOF
+0. 0. 0. 0.
+.1 0. 0. 0.
+.2 .0085 0. 0.
+.3 .0616 0. 0.
+.4 .1875 0. 0.
+.5 .3952 0. 0.
+.6 .6751 0. 0.
+.7 1. 0. 0.
+1. 1. 0. 0.
+/
+
+
+
+---------------------------------------------------
+SOLUTION
+ 
+PRESSURE
+ 40*50.00 /
+
+TEMPI
+ 40*170 /
+
+SWAT
+ 40*1.0 /
+
+SGAS
+ 40*0.0 /
+
+AQUCHWAT
+ 1 50.0 PRESSURE 50.0 5E10 9* 170 /
+/
+
+-------------------------------------------------
+SUMMARY
+
+INCLUDE
+ '../inc/summary_WELLREPORT.inc' /
+
+RUNSUM
+EXCEL
+
+BPRES
+ 2 1 1 /
+/
+BENERGY
+ 2 1 1 /
+/
+BTEMP
+ 2 1 1 /
+/
+BSGAS
+ 2 1 1 /
+/
+BSWAT
+ 2 1 1 /
+/
+
+------------------------------------------------
+SCHEDULE
+ 
+
+INCLUDE
+ '../inc/schedule_REPORT.inc' /
+
+WELSPECS
+ INJ FIELD 1 1 1* LIQ /
+/
+
+COMPDAT
+ INJ 1 1 1 1 OPEN /
+/
+
+WCONINJE
+-- 10 kg/s
+-- 10*60*60*24 = 864000 kg/day
+-- sm3/day for surface flow rates - we assume 1m3 = 919kg @ 160C
+-- injection temperature is 160C
+-- 864000/919 = 940.15 m3/day
+ INJ WATER OPEN RATE 940.15 940.15 /
+/
+
+WINJTEMP
+ INJ 1* 160 50 /
+/
+
+-- Numerical simulation timesteps
+TSTEP
+1 4 15 80 150 250 250 375 562.5 843.8 1265.5999 1898.3999 1304.7002 5*1000
+/
+
+-- To match analytical timesteps
+--TSTEP
+--1.16E-06
+--1.16E-06
+--3.47E-06
+--5.79E-06
+--1.27E-05
+--2.43E-05
+--4.98E-05
+--9.84E-05
+--1.98E-04
+--3.95E-04
+--7.91E-04
+--1.58E-03
+--3.16E-03
+--6.32E-03
+--1.26E-02
+--2.53E-02
+--5.06E-02
+--1.01E-01
+--2.02E-01
+--4.05E-01
+--8.09E-01
+--1.62E+00
+--3.24E+00
+--6.47E+00
+--1.29E+01
+--2.59E+01
+--5.18E+01
+--1.04E+02
+--2.07E+02
+--4.14E+02
+--8.29E+02
+--1.66E+03
+--3.31E+03
+--6.63E+03
+--1.33E+04
+--2.65E+04
+--5.30E+04
+--/
+END

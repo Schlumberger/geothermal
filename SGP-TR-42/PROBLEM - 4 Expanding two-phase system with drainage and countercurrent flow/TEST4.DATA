@@ -1,0 +1,234 @@
+-- 4th Stanform Geothermal Problem
+--
+RUNSPEC
+
+METRIC
+
+DIMENS
+ 1 1 22 /
+
+
+INCLUDE
+ '../inc/runspec_STEAM.inc' /
+
+AQUDIMS
+ /
+
+----------------------------------
+GRID
+
+INIT
+
+DX
+ 22*1000 /
+
+DY
+ 22*1000 /
+
+DZ
+ .003048 20*100. 0.003048 /
+
+TOPS
+ 0 /
+
+PORO
+ 1.0 10*0.15 10*0.25 1.0 /
+
+
+PERMX
+ 5000 10*4.935 10*98.69 5000 /
+PERMY
+ 5000 10*4.935 10*98.69 5000 /
+PERMZ
+ 5000 10*4.935 10*98.69 5000 /
+
+
+THCOIL
+ 22*59.8 /
+THCWATER
+ 22*59.8 /
+THCGAS
+ 22*4.36 /
+
+
+AQUANCON
+ 1 1 1 1 1 1 1 Z- /
+/
+
+-- NEEDED for ECLIPSE THERMAL
+HEATCR
+-- 1 J/g of 2.5 g/cc rock is 2500 kJ/m^3 of rock
+ 22*2500 /
+THCROCK
+-- given as 1 W/m-C 1 watt is 86.4 kJ/day.
+ 22*86.4 /
+
+-----------------------------------
+PROPS
+
+ROCK
+ 15 0 /
+
+SWOF
+0       0.000000        0       0
+0.3     0.000000        0       0
+0.35    0.000035        0       0
+0.4     0.000560        0       0
+0.5     0.008963        0       0
+0.6     0.045377        0       0
+0.7     0.143412        0       0
+0.8     0.350128        0       0
+0.9     0.726025        0       0
+0.93    0.882488        0       0
+0.95    1.000000        0       0
+1       1.000000        0       0
+/
+
+
+SGOF
+0       0       0       0
+0.05    0       0       0
+0.06    7.22664E-06     0       0
+0.1     0.000875319     0       0
+0.2     0.021742936     0       0
+0.3     0.091908547     0       0
+0.4     0.228178285     0       0
+0.5     0.433913378     0       0
+0.6     0.699030146     0       0
+0.7     1       0       0
+0.8     1       0       0
+1       1       0       0
+/
+
+
+INCLUDE
+ '../inc/props_STEAM.inc' /
+
+STCOND
+ 0 0 /
+-----------------------------------------
+SOLUTION
+
+PRESSURE 
+ 1.0133  5.9019  15.6242 25.2286 
+ 34.662  43.8879 52.8745 61.5888
+ 69.9949 78.0493 85.6977 92.993
+ 100.136 107.2397 114.304 121.3277
+ 128.3121 135.2551 142.1561 149.0157
+ 155.8319 159.2261 /
+
+TEMPI
+  10  24  52  80 108 136 164 192 220 248 276
+-- 'COMMENT' 'NOW INCREASE BY 2 C EVERY 100 M'
+ 291 293 295 297 299 301 303 305 307 309 310 /
+
+SGAS
+ 22*0 /
+
+SWAT
+ 22*1 /
+
+AQUCHWAT
+ 1  0.0 PRESSURE 1.0133 1e20 3* 1* 5* 10 /
+/
+
+
+----------------------------------------
+SUMMARY
+
+INCLUDE
+ '../inc/summary_WELLREPORT.inc' /
+
+BWSAT
+ 1 1 12
+ 1 1 17
+/
+
+
+BGKR
+ 1 1 1 
+ 1 1 22
+/
+BGDEN
+ 1 1 1 
+ 1 1 22
+/
+BVGAS
+ 1 1 1 
+ 1 1 22
+/
+
+BWKR
+ 1 1 1 
+ 1 1 22
+/
+BWDEN
+ 1 1 1 
+ 1 1 22
+/
+BVWAT
+ 1 1 1 
+ 1 1 22
+/
+
+BHWAT
+ 1 1 1
+ 1 1 22
+/
+BHGAS
+ 1 1 1
+ 1 1 22
+/
+----------------------------------------
+SCHEDULE
+
+INCLUDE
+ '../inc/schedule_REPORT.inc' /
+
+AQUCHWAT
+ 1  0.0 PRESSURE 1.0133 1e50 3* 1* 5* 10 /
+/
+
+UDQ
+-- BUFLEN is the Block User-defined FLowing ENthalpy
+-- The definition of flowing enthalpy comes from:
+-- eq. 13 of 'A similarity method for geothermal well test analysis'
+-- M.J. O'Sullivan, 1981. Water Resources Research, V17 (2), p390-398.
+--
+-- verified against equation 10 of:
+-- 'Analysis of injection testing of geothermal reservoirs'
+--    M. O'Sullivan and K. Pruess, LBL-10985.
+DEFINE BUGMOB ((BGKR*BGDEN)/(BVGAS+1e-6)) /
+DEFINE BUWMOB ((BWKR*BWDEN)/(BVWAT+1e-6)) /
+DEFINE BUFLEN (((BHGAS*BUGMOB)+(BHWAT*BUWMOB))/((BUGMOB+BUWMOB)*18.01528)) /
+-- UNITS assume ECLIPSE METRIC
+UNITS BUFLEN KJ/KG /
+/
+
+
+WELSPECS
+ DOG FIELD 1 1 1* LIQ /
+/
+COMPDAT
+ DOG 1 1 22 22 OPEN 1* 5e10 /
+/
+
+
+WCONPROD
+-- Constant discharge rate of 100 kg/s 
+-- kg-mol/day for TMRA = 100*60*60*24/18.01528 = 8640000/18.01528 = 479593
+ DOG OPEN TMRA 5* 1 4* 479593 /
+/
+
+-- Timestepping controls for startup.
+TUNING
+ 1e-6 365 1e-9 /
+ /
+ /
+
+
+TSTEP
+ 1*1 40*365.25 /
+
+END
+

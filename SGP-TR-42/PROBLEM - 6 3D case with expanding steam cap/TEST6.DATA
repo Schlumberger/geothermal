@@ -1,0 +1,252 @@
+-- Stanford test problem #6
+-- 3D Wairakei type problem
+-- using quarter symmetry well GF
+RUNSPEC
+
+METRIC
+
+DIMENS
+ 5 5 7 /
+
+INCLUDE
+ '../inc/runspec_STEAM.inc' /
+
+AQUDIMS
+ 9 9 2* 1* 1* /
+
+------------------------------------------------------
+GRID
+
+INIT
+
+DXV 
+ 5*1000 /
+
+DYV
+ 5*800 /
+
+DZV
+ 0.3048 4*300 600 0.3048 /
+
+TOPS
+ 25*0 /
+
+PORO
+ 25*1
+ 25*0.2
+ 75*0.25
+ 25*0.2
+ 25*1
+/
+
+PERMX
+ 50*100 75*200 50*100 /
+PERMY
+ 50*100 75*200 50*100 /
+PERMZ
+ 50*2 75*50 50*2 /
+
+-- Rock and fluid thermal properties
+THCOIL
+ 175*59.8 /
+THCWATER
+ 175*59.8 /
+THCGAS
+ 175*4.11 /
+
+-- NEEDED for ECLIPSE THERMAL
+HEATCR
+-- 1 J/g of 2.5 g/cc rock is 2500 kJ/m^3 of rock
+ 175*2500 /
+THCROCK
+-- given as 1 W/m-C 1 watt is 86.4 kJ/day.
+ 175*86.4 /
+
+
+AQUANCON
+-- TOP
+ 1 1 5 1 5 1 1 Z- /
+-- BOTTOM
+ 2 1 5 1 5 7 7 Z+ /
+-- X at 5km
+ 3 5 5 1 5 1 1 X+ /
+ 4 5 5 1 5 2 2 X+ /
+ 5 5 5 1 5 3 3 X+ /
+ 6 5 5 1 5 4 4 X+ /
+ 7 5 5 1 5 5 5 X+ /
+ 8 5 5 1 5 6 6 X+ /
+ 9 5 5 1 5 7 7 X+ /
+/ 
+
+------------------------------------------------------
+PROPS
+
+ROCK
+ 15 0 /
+
+
+SWOF
+0	0.000000	0	0
+0.3	0.000000	0	0
+0.35	0.000035	0	0
+0.4	0.000560	0	0
+0.5	0.008963	0	0
+0.6	0.045377	0	0
+0.7	0.143412	0	0
+0.8	0.350128	0	0
+0.9	0.726025	0	0
+0.93	0.882488	0	0
+0.95	1.000000	0	0
+1	1.000000	0	0
+/			
+
+
+SGOF
+0	0	0	0
+0.05	0	0	0
+0.06	7.22664E-06	0	0
+0.1	0.000875319	0	0
+0.2	0.021742936	0	0
+0.3	0.091908547	0	0
+0.4	0.228178285	0	0
+0.5	0.433913378	0	0
+0.6	0.699030146	0	0
+0.7	1	0	0
+0.8	1	0	0
+1	1	0	0
+/			
+
+
+INCLUDE
+ '../inc/props_STEAM.inc' /
+
+STCOND
+ 0 0 / 
+------------------------------------------------------
+SOLUTION
+
+PRESSURE
+ 25*29.897
+ 25*43.1745
+-- For layer 3 we want saturation with steam & water
+ 25*64.160
+ 25*85.230
+ 25*107.3134
+ 25*140.4381
+ 25*161.2397
+/
+
+TEMPI
+ 50*160 125*280 /
+
+-- PROBLEM layer 4 (our layer 3)
+-- LAYER 3 has initial 10% steam
+SWAT
+ 50*1.0 25*0.9 100*1.0 /
+SGAS
+ 50*0.0 25*0.1 100*0.0 /
+
+-- From SGP-TR-042, page 76
+-- ...temperatures and pressures are kept at their initial
+-- values at the upper and lower boundaries, and at the
+-- surface at x=5km. The other three surfaces are closed
+-- (no flow).
+AQUCHWAT
+-- TOP
+ 1  0.0    PRESSURE 29.897   1e20 3* 1* 5* 160 /
+-- BOTTOM
+ 2  1800.0 PRESSURE 161.2397 1e20 3* 1* 5* 280 /
+-- X=5km
+-- 0.3048 4*300 600 0.3408  - Z cell thicknesses
+-- 0 150 450 750 1050 1500 1800 - cell centre depths
+-- PRESSURE and TEMPI values used
+ 3  0.0    PRESSURE 29.897    1e20 3* 1* 5* 160 /
+ 4  150    PRESSURE 43.1745   1e20 3* 1* 5* 160 /
+ 5  450    PRESSURE 64.160    1e20 3* 1* 5* 279.9 / 
+ 6  750    PRESSURE 85.230    1e20 3* 1* 5* 280 /
+ 7  1050   PRESSURE 107.3134  1e20 3* 1* 5* 280 /
+ 8  1500   PRESSURE 140.4381  1e20 3* 1* 5* 280 /
+ 9  1800   PRESSURE 161.2397  1e20 3* 1* 5* 280 /
+/
+
+ 
+------------------------------------------------------
+SUMMARY
+
+INCLUDE
+ 'summary_WELLREPORT.inc' /
+
+WWMR 
+/
+
+INCLUDE
+ 'summary_TEST6blocks.inc' /
+ 
+WSTPR
+/
+
+BUFLEN
+ 1 1 2 /
+/
+
+RUNSUM
+EXCEL
+
+------------------------------------------------------
+SCHEDULE
+ 
+INCLUDE
+ '../inc/schedule_REPORT.inc' /
+
+
+WELSPECS
+ DOG FIELD 1 1 1* LIQ /
+/
+COMPDAT
+ DOG 1 1 5 5  OPEN 1* 5e10 /
+/
+-- Page 34 of SGP-TR-042
+-- All production is taken from a single corner cell (i=1, j=1, k=2)
+--
+-- 0 < t <   2 years,  Q(t) = 1000 kg/s
+-- 2 < t <=  4 years,  Q(t) = 2500 kg/s
+-- 4 < t <=  6 years,  Q(t) = 4000 kg/s
+-- 6 < t <= 10 years,  Q(t) = 6000 kg/s
+
+WCONPROD
+-- Constant discharge rate of 1000 kg/s
+-- kg-mol/day for TMRA = 1000*60*60*24/18.01528 = 86400000/18.01528 = 4795929
+ DOG OPEN TMRA 5* 1 4* 4795929 /
+/
+
+TSTEP
+ 20*36.525 /
+
+WCONPROD
+-- Constant discharge rate of 2500 kg/s
+-- kg-mol/day for TMRA = 2500*60*60*24/18.01528 = 216000000/18.01528 = 11989822
+ DOG OPEN TMRA 5* 1 4* 11989822 /
+/
+ 
+TSTEP
+ 20*36.525 /
+
+WCONPROD
+-- Constant discharge rate of 4000 kg/s
+-- kg-mol/day for TMRA = 4000*60*60*24/18.01528 = 345600000/18.01528 = 19183715
+ DOG OPEN TMRA 5* 1 4* 19183715 /
+/
+
+TSTEP
+ 20*36.525 /
+
+WCONPROD
+-- Constant discharge rate of 6000 kg/s
+-- kg-mol/day for TMRA = 6000*60*60*24/18.01528 = 518400000/18.01528 = 28775573
+ DOG OPEN TMRA 5* 1 4* 28775573 /
+/
+
+TSTEP
+ 40*36.525 /
+
+END

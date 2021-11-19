@@ -1,0 +1,214 @@
+-- Stanford Geothermal Problem 5a
+--
+RUNSPEC
+
+METRIC
+
+DIMENS
+ 12 8 1 /
+
+INCLUDE
+ '../inc/runspec_STEAM.inc' /
+
+AQUDIMS
+ /
+ 
+
+
+------------------------------------------------------
+GRID
+
+INIT
+
+DXV
+ 12*25.0 /
+
+DYV
+ 8*25.0 /
+
+DZV
+ 10.0 /
+
+TOPS
+ 96*0 /
+
+PORO
+ 96*0.35 /
+
+PERMX
+ 96*25.0 /
+PERMY
+ 96*25.0 /
+PERMZ
+ 96*25.0 /
+
+THCOIL
+ 96*59.8 /
+THCWATER
+ 96*59.8 /
+THCGAS
+ 96*4.11 /
+
+-- NEEDED for ECLIPSE THERMAL
+HEATCR
+-- 1 J/g of 2.5 g/cc rock is 2500 kJ/m^3 of rock
+ 96*2500 /
+THCROCK
+-- given as 1 W/m-C 1 watt is 86.4 kJ/day.
+ 96*86.4 /
+
+
+AQUANCON
+ 1 12 12 1 8 1 1 X+ /
+/
+
+
+------------------------------------------------------
+PROPS
+
+ROCK
+ 15 0 /
+
+SWOF
+0	0.000000	0	0
+0.3	0.000000	0	0
+0.35	0.000035	0	0
+0.4	0.000560	0	0
+0.5	0.008963	0	0
+0.6	0.045377	0	0
+0.7	0.143412	0	0
+0.8	0.350128	0	0
+0.9	0.726025	0	0
+0.93	0.882488	0	0
+0.95	1.000000	0	0
+1	1.000000	0	0
+/			
+
+
+SGOF
+0	0	0	0
+0.05	0	0	0
+0.06	7.22664E-06	0	0
+0.1	0.000875319	0	0
+0.2	0.021742936	0	0
+0.3	0.091908547	0	0
+0.4	0.228178285	0	0
+0.5	0.433913378	0	0
+0.6	0.699030146	0	0
+0.7	1	0	0
+0.8	1	0	0
+1	1	0	0
+/			
+
+
+INCLUDE
+ '../inc/props_STEAM.inc' /
+
+STCOND
+ 0 0 / 
+-------------------------------------------------------
+SOLUTION
+
+PRESSURE
+ 96*35.978 /
+
+TEMPI
+ 212.07 210.18 206.41 200.81 193.59 185.18 176.31 168.09 162.03 3*160.
+ 224.92 223.16 219.54 213.95 206.41 197.16 186.79 176.31 167.13 161.12 2*160.
+ 234.31 232.93 229.92 224.92 217.7 208.29 197.16 185.18 173.71 164.58 160.11
+ 160.
+ 239.31 238.62 236.74 232.93 226.64 217.7 206.41 193.59 180.56 169.11 161.54
+ 160.
+ 2*240. 239.77 237.76 232.93 224.92 213.95 200.81 186.79 173.71 163.85 160.
+ 3*240. 239.77 236.74 229.92 219.54 206.41 191.85 177.68 166.22 160.26
+ 4*240. 238.62 232.93 223.16 210.18 195.36 180.56 168.09 160.77
+ 4*240. 239.31 234.31 224.92 212.07 197.16 182.06 169.11 161.12
+/
+
+SWAT
+ 96*1.0 /
+
+SGAS
+ 96*0.0 /
+
+AQUCHWAT
+ 1  5.0 PRESSURE 35.978 1e20 3* 1* 5* 160 /
+/
+
+---------------------------------------------------------
+SUMMARY
+
+INCLUDE
+ 'summary_WELLREPORT.inc' /
+
+
+INCLUDE
+ 'summary_TEST5blocks.inc' /
+ 
+WSTPR
+/
+
+BUFLEN
+ 3 6 1 /
+/
+
+RUNSUM
+EXCEL
+
+-------------------------------------------------------
+SCHEDULE
+ 
+INCLUDE
+ '../inc/schedule_REPORT.inc' /
+
+
+
+WELSPECS
+ DOG FIELD 3 6 1* LIQ /
+/
+COMPDAT
+ DOG 3 6 1 1 OPEN 1* 1* 0.30 /
+/
+
+UDQ
+-- BUFLEN is the Block User-defined FLowing ENthalpy
+-- The definition of flowing enthalpy comes from:
+-- eq. 13 of 'A similarity method for geothermal well test analysis'
+-- M.J. O'Sullivan, 1981. Water Resources Research, V17 (2), p390-398.
+--
+-- verified against equation 10 of:
+-- 'Analysis of injection testing of geothermal reservoirs'
+--    M. O'Sullivan and K. Pruess, LBL-10985.
+DEFINE BUGMOB ((BGKR*BGDEN)/(BVGAS+1e-6)) /
+DEFINE BUWMOB ((BWKR*BWDEN)/(BVWAT+1e-6)) /
+DEFINE BUFLEN (((BHGAS*BUGMOB)+(BHWAT*BUWMOB))/((BUGMOB+BUWMOB)*18.01528)) /
+-- UNITS assume ECLIPSE METRIC
+UNITS BUFLEN KJ/KG /
+/
+
+
+
+
+
+WCONPROD
+-- Constant discharge rate of 0.5 kg/s
+-- kg-mol/day for TMRA = 0.5*60*60*24/18.01528 = 43200/18.01528 = 2398
+-- sm3/day 43.2
+-- NOTE - ITEM 8 - RESERVOIR VOLUME LIMIT IS THE CONTROLLING
+-- VALUE HERE.
+ DOG OPEN TMRA 5* 1 4* 2398 /
+/
+
+
+TSTEP
+ 0.0001 0.1 1.0 /
+ 
+TSTEP
+ 100*3.6525 /
+
+
+TSTEP
+ 90*36.525 /
+
+END
+
