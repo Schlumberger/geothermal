@@ -8,3 +8,6 @@ The examples provided all run in the [ECLIPSE Thermal simulator](https://www.sof
 
 Details of the expected results and comparison to analytical solutions can be found in the paper by [Stacey & Williams, 2017](https://publications.mygeoenergynow.org/grc/1033860.pdf)
 
+To run these examples, download the `SGP-TR-42` directory and note that the relative path to the `INCLUDE` files in the `inc` directory must be maintained.
+
+If you encounter any issues running these files, please contact [Mike Williams](mailto:miw@slb.com)
